@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>工作排程管理</title>
+
+        <link rel="stylesheet" href="./css/reset.css" />
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="./css/bootstrap-icons.css" />
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+
+        <!-- jquery -->
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+        <link rel="stylesheet" href="./css/style.css" />
+        <style type="text/css">
+            .tooltip-inner{
+                max-width: 300px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>工作流程</h1>
+        <div id="workFlow" class="container-fluid">
+            <div class="row">
+                <!-- 控制區 -->
+                <div class="col-sm-6 col-12 order-sm-1 order-1">
+                    <div class="setting_area">
+                        排序方式：
+                        <select v-model="work_sort" @change="renew_work_sort">
+                            <option value="create_asc">依建立順序，由舊至新</option>
+                            <option value="create_desc">依建立順序，由新至舊</option>
+                            <option value="worktime_asc">依排程順序，由近至遠</option>
+                        </select>
+                        <button @click="renew_work_sort">更新排序</button><br />
+                        單位寬度：<span v-text="unit_width"></span>px
+                        <div id="slider" class="mb-2"></div>
+                        <!-- <select v-model="unit_width" class="mr-4">
+                            <option value="50">50px</option>
+                            <option value="100">100px</option>
+                            <option value="200">200px</option>
+                            <option value="400">400px</option>
+                        </select> -->
+                        單位時長：
+                        <select v-model="unit_time" class="mb-2" @change="get_calendar">
+                            <option value="43200">半天</option>
+                            <option value="86400">一天</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 說明區 -->
+                <div class="col-sm-6 col-12 order-sm-2 order-3 d-flex justify-content-end" v-if="editable">
+                    <ol class="pr-2 m-0">
+                        <li>1.單擊甘特圖可開啟時間修改面板</li>
+                        <!-- <li>1.單擊甘特圖可修改事件狀態成緊急/一般</li> -->
+                        <li>2.雙擊甘特圖可取消排程</li>
+                        <li>3.按住甘特圖拖移工作時間</li>
+                        <li>4.拖移超出甘特圖範圍後如還須調整時間，請保持按住滑鼠並上下移動</li>
+                    </ol>
+                </div>
+
+                <!-- 主畫面區 -->
+                <div class="col-sm-12 col-12 order-sm-3 order-2" style="clear: both;">
+                    <div class="w-100 d-flex position-relative">
+                        <!-- 工作標題區 -->
+                        <div class="work_info_area border">
+                            <div class="text-center thead d-flex align-items-center justify-content-center">工作項目</div>
+                            <div class="position-relative">
+                                <!-- 各工作 -->
+                                <div class="input_area w-100">
+                                    <div class="work d-flex justify-content-between align-items-center" v-for="(work, index) in works">
+                                        <a :href="'' + work.eve_id" target="_blank">
+                                            <span class="eve_title mr-4" v-text="work.name"
+                                                data-toggle="tooltip"
+                                                data-placement="bottom"
+                                                :data-original-title="'執行者：' + work.u_name"
+                                            ></span>
+                                        </a>
+                                        <!-- <div class="time_input small_font">
+                                            <div>
+                                                S：<input name="date" type="date" :value="date_to_input_value_date(work.sdate)" @change="input_change_time(event, index, 'sdate', work)" />
+                                                <select name="hour" @change="input_change_time(event, index, 'sdate', work)">
+                                                    <option v-for="option in hour_option" :selected="date_to_input_value_hour(work.sdate)==option" :value="option" v-text="option"></option>
+                                                </select>
+                                                :
+                                                <select name="minute" @change="input_change_time(event, index, 'sdate', work)">
+                                                    <option v-for="option in minute_option" :selected="date_to_input_value_minute(work.sdate)==option" :value="option" v-text="option"></option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                E：<input name="date" type="date" :value="date_to_input_value_date(work.edate)" @change="input_change_time(event, index, 'edate', work)" />
+                                                <select name="hour" @change="input_change_time(event, index, 'edate', work)">
+                                                    <option v-for="option in hour_option" :selected="date_to_input_value_hour(work.edate)==option" :value="option" v-text="option"></option>
+                                                </select>
+                                                :
+                                                <select name="minute" @change="input_change_time(event, index, 'edate', work)">
+                                                    <option v-for="option in minute_option" :selected="date_to_input_value_minute(work.edate)==option" :value="option" v-text="option"></option>
+                                                </select>
+                                            </div>
+                                        </div> -->
+                                    </div>
+                                </div>
+
+                                <!-- 展開按鈕 -->
+                                <div class="extend_btn d-flex align-items-center position-absolute h-100 border" onclick="work_setting_toggle()">
+                                    <i class="right_btn bi bi-chevron-compact-right"></i>
+                                    <i class="left_btn bi bi-chevron-compact-left"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 工作日曆區 -->
+                        <div id="time_bar_area" class="time_bar_area position-relative border border-left-0 w-100">
+                            <!-- 今日標記 -->
+                            <dir
+                                class="current_day_mark position-absolute bg-warning p-0"
+                                :style="{width: unit_width+'px', 
+                              left: get_work_position(current_day) +'px'}"
+                            ></dir>
+
+                            <!-- 日曆日期 -->
+                            <div class="day_row text-center d-flex">
+                                <div
+                                    v-for="day in calendar_days"
+                                    :class="['week_day border-left border-right d-flex align-items-center justify-content-center', 
+                                              day.holiday ? 'text-danger': '']"
+                                    :style="{width: unit_width+'px'}"
+                                    data-toggle="tooltip"
+                                    data-placement="bottom"
+                                    :data-original-title="day.description"
+                                >
+                                    <span>
+                                        <span v-text="day.name"></span>
+                                        <span v-if="day.holiday_name"> (<span v-text="day.holiday_name"></span>) </span><br />
+                                        <span v-text="day.weekday"></span>
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- 時間甘特圖 -->
+                            <div class="time_bar d-flex position-relative" v-for="(work, index) in works" 
+                                 :style="{left: get_work_position(work)+'px'}">
+                                <div class="d-flex" v-if="editable || get_work_width(work)!=0">
+                                    <button :class="['input-group-text', 'dc_btn', 'dc_btn-l', !editable ? 'invisible' : '']"
+                                            @mousedown="change_width(index, work, 'sdate')">
+                                        <i class="bi bi-chevron-double-left"></i>
+                                    </button>
+                                    <div
+                                        :class="['work_time', 'form-control', 'rounded-0', work.state]"
+                                        :style="{width: get_work_width(work) +'px'}"
+                                        data-toggle="tooltip"
+                                        data-placement="bottom"
+                                        :data-original-title="work.sdate + '~   ' + work.edate"
+                                        @click="click_one_time(index, work)"
+                                        @dblclick="set_work_notime(index)"
+                                        @mousedown="move_work(index, work)"
+                                    ></div>
+                                    <button :class="['input-group-text', 'dc_btn', 'dc_btn-r', !editable ? 'invisible' : '']" 
+                                            @mousedown="change_width(index, work, 'edate')">
+                                        <i class="bi bi-chevron-double-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 工作背景色區塊 -->
+                        <div class="bg_area position-absolute">
+                            <div class="w-100 border-top border-bottom thead"></div>
+                            <div class="work w-100" v-for="work in works"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 送出資料按鈕 -->
+                <div class="col-sm-12 col-12 order-sm-4 order-4 mt-2 mb-4 d-flex justify-content-center" v-if="editable">
+                    <button class="btn btn-secondary" @click="save_date()">儲存排程資料</button>
+                </div>
+            </div>
+
+            <a id="edit_panel_btn" data-toggle="modal" data-target="#edit_panel"></a>
+            <!-- 編輯流程時間面板 -->
+            <div class="modal fade" id="edit_panel" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="memberLoginTitle">編輯排程</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body d-flex flex-column justify-content-center">
+                            <p>
+                                <span class="mr-4" v-text="edit_panel.name"></span>執行者：<span v-text="edit_panel.u_name"></span>
+                            </p>
+                            <div class="start_time">
+                                開始時間：<input name="date" type="date" :value="date_to_input_value_date(edit_panel.sdate)"/>
+                                <select name="hour">
+                                    <option v-for="option in hour_option" :selected="date_to_input_value_hour(edit_panel.sdate)==option" :value="option" v-text="option"></option>
+                                </select>
+                                :
+                                <select name="minute">
+                                    <option v-for="option in minute_option" :selected="date_to_input_value_minute(edit_panel.sdate)==option" :value="option" v-text="option"></option>
+                                </select>
+                            </div>
+                            <div  class="end_time">
+                                結束時間：<input name="date" type="date" :value="date_to_input_value_date(edit_panel.edate)"/>
+                                <select name="hour">
+                                    <option v-for="option in hour_option" :selected="date_to_input_value_hour(edit_panel.edate)==option" :value="option" v-text="option"></option>
+                                </select>
+                                :
+                                <select name="minute">
+                                    <option v-for="option in minute_option" :selected="date_to_input_value_minute(edit_panel.edate)==option" :value="option" v-text="option"></option>
+                                </select>
+                            </div>
+
+                            <input type="btn" class="btn btn-primary mt-2" value="儲存" @click="do_edit_panel()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- bootstrap -->
+        <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+        <!-- vue -->
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+        <script src="https://unpkg.com/vue-toasted@1.1.28/dist/vue-toasted.min.js"></script>
+
+        <script src="./js/all.js"></script>
+        <script>
+            var workFlowVM = null;
+
+            /*讀取事先載好的假日資料*/
+            holiday_data = [];
+            $.ajax({
+                type: "GET",
+                async: true,
+                datatype: "json",
+                url: "./get_holiday.php",
+                success: function (result) {
+                    // holiday_data = JSON.parse(result);
+                    holiday_data = result;
+                    workFlowVM = init_vue(); // 建立vue物件
+                },
+            });
+
+            // 定義展開工作設定區
+            function work_setting_toggle() {
+                var work_info_area = $(".work_info_area");
+                var extend_btn = $(".work_info_area .extend_btn");
+                current_width = work_info_area.width();
+                if (current_width <= 100) {
+                    work_info_area.addClass("w-100");
+                    extend_btn.addClass("open");
+                } else {
+                    work_info_area.removeClass("w-100");
+                    extend_btn.removeClass("open");
+                }
+            }
+        </script>
+    </body>
+</html>

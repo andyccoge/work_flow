@@ -1,0 +1,24 @@
+{
+    "name": "andy/workflow",
+    "description": "hand made application for arranging jobs flow",
+    "type": "project",
+    "keywords": [
+        "work flow",
+        "job flow",
+        "project management"
+    ],
+    "homepage": "http://andyccoge.net/",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "andyccoge",
+            "email": "andyccoge@gmail.com"
+        }
+    ],
+	"require": {
+        "php": ">=5.4.0"
+    },
+    "config": {
+        "preferred-install": "dist"
+    }
+}

@@ -1,0 +1,154 @@
+/*通用設定--------------------------------*/
+:root {
+  --dc_btn_width: 20px; /*調整時間的按鈕寬度*/
+}
+.small_font{
+	font-size: 12px;
+}
+
+.thead,
+.work,
+.time_bar{
+	box-sizing: content-box;
+}
+
+.work,
+.row_height,
+.time_bar,
+.time_bar .dc_btn,
+.time_bar .work_time{
+	height: 20px;
+}
+.work,
+.time_bar{
+	padding: 5px 0px;
+}
+
+
+/*控制區--------------------------------*/
+.setting_area{
+	max-width: 400px;
+}
+
+/*工作標題區--------------------------------*/
+.work_info_area{
+	white-space:nowrap;
+}
+.work_info_area .input_area{
+	overflow-x: scroll;
+}
+.work_info_area input[type="date"]{
+	width: 120px;
+}
+.work_info_area .work{
+	padding-left: 5px;
+	padding-right: 0px;
+}
+.work_info_area .work .time_input{
+	padding-right: 25px;
+}
+
+.work_info_area{
+	max-width: 500px;
+	width: 100px;
+}
+
+/*@media only screen and (min-width: 576px){
+	.work_info_area{
+		width: 500px !important;
+	}
+}
+@media only screen and (max-width: 575px){
+	.work_info_area{
+		width: 100px;
+	}
+	.work_info_area .work{
+		width: max-content;
+	}
+}*/
+.work_info_area .extend_btn{
+	z-index: 2;
+	top: 0px;
+    left: -15px;
+    width: var(--dc_btn_width);
+    border-radius: 0 .25rem .25rem 0;
+    white-space: initial;
+    background-color: #959595;
+    color: #ffffff;
+    cursor: pointer;
+    user-select: none;
+}
+.work_info_area .extend_btn .right_btn,
+.work_info_area .extend_btn .left_btn{
+	display: none;
+}
+.work_info_area .extend_btn:not(.open) .right_btn{
+	display: block;
+}
+.work_info_area .extend_btn.open .left_btn{
+	display: block;
+}
+.work_info_area .extend_btn.open{
+	left: unset;
+    right: -0px;
+    border-radius: .25rem 0 0 .25rem;
+}
+/*工作日曆區--------------------------------*/
+.time_bar_area{
+	user-select: none;
+	overflow-x: scroll; 
+}
+
+.time_bar_area .day_row{
+	padding-left: var(--dc_btn_width);
+}
+
+.time_bar_area .day_row,
+.time_bar_area .time_bar{
+	width: max-content;
+}
+
+.time_bar .work_time{
+	padding-right: 0;
+    padding-left: 0;
+    background: #ffc107;
+    cursor: col-resize;
+}
+.time_bar .work_time.hurry{
+	background: #dc3545;
+}
+.time_bar .dc_btn{
+    width: var(--dc_btn_width);
+    padding-right: 0;
+    padding-left: 0;
+    display: flex;
+    justify-content: center;
+    border-radius: 0;
+    cursor: ew-resize;
+}
+.time_bar .dc_btn-l{
+	border-radius: .25rem 0 0 .25rem;
+}
+.time_bar .dc_btn-r{
+	border-radius: 0 .25rem .25rem 0;
+}
+
+.time_bar_area .current_day_mark{
+	top: 0px;
+    height: 100%;
+	opacity: 0.2;
+	margin: 0 0 0 var(--dc_btn_width);
+}
+
+/*工作背景色區塊--------------------------------*/
+.bg_area{
+	top: 0px;
+	z-index: -1;
+	width: inherit;
+}
+.bg_area .thead{
+	background-color: #b8b8b8;
+}
+.bg_area .work:nth-child(odd){
+	background-color: #e8e8e8;
+}
