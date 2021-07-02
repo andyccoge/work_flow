@@ -84,7 +84,7 @@
                         min: 50,
                         max: 400,
                         slide: function (event, ui) {
-                            workFlowVM.unit_width = ui.value;
+                            this.unit_width = ui.value;
                         },
                     });
                 });
@@ -123,7 +123,7 @@
                     // console.log(newdate);
                     /*檢查與更新某工作開/始結束時間*/
 
-                    result = workFlowVM.check_and_update_work_time(newdate, index, time_type, work);
+                    result = this.check_and_update_work_time(newdate, index, time_type, work);
                     if (result) {
                         Vue.toasted.show("修改時間成功", { duration: 1500, className: ["toasted-primary", "bg-success"] });
                     }
@@ -299,9 +299,9 @@
                             result = false;
                         }
                     }
-                    workFlowVM.works[index][time_type] = new_format_time; /*更改此工作的時間*/
+                    this.works[index][time_type] = new_format_time; /*更改此工作的時間*/
 
-                    workFlowVM.get_area_s_e_date(); /*更新日期區的開始結束時間*/
+                    this.get_area_s_e_date(); /*更新日期區的開始結束時間*/
                     return result;
                 },
                 click_one_time: function (index, work) {
@@ -364,6 +364,7 @@
                     }else{
                         Vue.toasted.show("未選擇編輯對象", { duration: 1500, className: ["toasted-primary", "bg-success"] });
                     }
+                    this.get_area_s_e_date(); /*更新日期區的開始結束時間*/
                     $('#edit_panel').modal('hide');
                 },
                 set_work_notime: function (index) {
