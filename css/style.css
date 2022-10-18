@@ -6,6 +6,19 @@
 	font-size: 12px;
 }
 
+.async_overflow{
+	overflow: scroll;
+}
+.overflow_x_hidden{
+	overflow-x: hidden;
+}
+.overflow_y_hidden{
+	overflow-y: hidden;
+}
+.width_fit_content{
+	width: fit-content;
+}
+
 .thead,
 .work,
 .time_bar{
@@ -33,9 +46,10 @@
 /*工作標題區--------------------------------*/
 .work_info_area{
 	white-space:nowrap;
-}
-.work_info_area .input_area{
-	overflow-x: scroll;
+	resize: horizontal;
+  overflow-y: hidden;
+  max-width: fit-content;
+  min-width: 100px;
 }
 .work_info_area input[type="date"]{
 	width: 120px;
@@ -49,7 +63,6 @@
 }
 
 .work_info_area{
-	max-width: 500px;
 	width: 100px;
 }
 
@@ -90,17 +103,34 @@
 }
 .work_info_area .extend_btn.open{
 	left: unset;
-    right: -0px;
-    border-radius: .25rem 0 0 .25rem;
+  right: -20px;
+  border-radius: .25rem 0 0 .25rem;
 }
 /*工作日曆區--------------------------------*/
 .time_bar_area{
 	user-select: none;
-	overflow-x: scroll; 
+	overflow-x: hidden;
+}
+
+.time_bar_area .day_row_area::-webkit-scrollbar {
+  display: none;
+}
+.time_bar_area .day_row_area{
+  -ms-overflow-style: none;  // IE and Edge
+  scrollbar-width: none;  // Firefox
+}
+.time_bar_area .current_day_mark{
+	top: 0px;
+  height: 100%;
+	opacity: 0.2;
+	margin: 0 0 0 var(--dc_btn_width);
 }
 
 .time_bar_area .day_row{
 	padding-left: var(--dc_btn_width);
+}
+.day_row .day_end_blank{
+	padding-left: calc(1rem + var(--dc_btn_width));
 }
 
 .time_bar_area .day_row,
@@ -131,13 +161,6 @@
 }
 .time_bar .dc_btn-r{
 	border-radius: 0 .25rem .25rem 0;
-}
-
-.time_bar_area .current_day_mark{
-	top: 0px;
-    height: 100%;
-	opacity: 0.2;
-	margin: 0 0 0 var(--dc_btn_width);
 }
 
 /*工作背景色區塊--------------------------------*/

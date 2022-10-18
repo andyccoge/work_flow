@@ -1,9 +1,46 @@
 {
-    Vue.use(Toasted);
     // Vue.toasted.show(文字內容,{
     //   duration:1500, 停留時間 1000=1秒
     //   className:['toasted-primary','bg-danger'], 自訂class
     // });
+    window.mobileCheck = function() {
+      let check = false;
+      (function(a){
+        if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;
+        if(/(iPad)|(Android)/i.test(a)) check = true;
+      })(navigator.userAgent||navigator.vendor||window.opera);
+      return check;
+    };
+
+    /*同步轉軸轉動*/
+    function init_scroll_event() {
+        var async_scroll_x = $('.async_scroll_x');
+        async_scroll_x.on('scroll', function(e){
+            x_scroll = $(e.currentTarget)[0].scrollLeft;
+            for (var i = 0; i < async_scroll_x.length; i++) {
+                async_scroll_x[i].scrollLeft = x_scroll;
+            }
+        });
+        var async_scroll_y = $('.async_scroll_y');
+        async_scroll_y.on('scroll', function(e){
+            y_scroll = $(e.currentTarget)[0].scrollTop;
+            for (var i = 0; i < async_scroll_y.length; i++) {
+                async_scroll_y[i].scrollTop = y_scroll;
+            }
+        });
+
+        function init_async_height(){
+            if(mobileCheck()){
+                $('.async_height').css({'max-height':'calc(50vh + 1rem)'});
+                $('.async_height_add_scrollbar').css({'max-height':'calc(50vh + 1rem)'});
+            }else{
+                $('.async_height').css({'max-height':'calc(50vh)'});
+                $('.async_height_add_scrollbar').css({'max-height':'calc(50vh + 1rem)'});
+            }
+        }
+        $(window).resize(function(){ init_async_height(); });
+        init_async_height();
+    }
 
     var ori_x = 0; // 紀錄原始位置
     var rightEnd = 0; // 工作日曆區最右位置
@@ -36,16 +73,16 @@
 
     workFlowData = {
         editable: true, /*是否允許編輯*/
+        to_current_day: false, /*是將轉軸轉至當前日期*/
 
-        unit_width: 200, /*一單位長度(px)*/
-        unit_time: 86400, /*一單位時長(預設一天)*/
-        work_sort: "create_asc", /*工作流程排序方式*/
+        unit2_width: 300, /*工作區寬度*/
+        unit_width: 50 /*一單位長度(px)*/,
+        unit_time: 86400 /*一單位時長(預設一天)*/,
+        work_sort: "create_asc" /*工作流程排序方式*/,
         week_day_list: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
         hour_option: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"],
         minute_option: ["00", "30"],
         calendar_days: [{ name: "", weekday: "", holiday: false, holiday_name: "", description: "" }],
-
-        search: {eve_id:""}, /*搜尋參數*/
 
         edit_panel_index : "",                                                                                              /*時間編輯面板編輯對象*/
         edit_panel : { eve_id: "0", step_order: "0", step_id: "0", name: "", u_name:"", sdate: "", edate: "", state: "" },  /*時間編輯面板*/
@@ -53,25 +90,55 @@
         /*今日日期區間*/
         current_day: { sdate: "0000-01-01 00:00", edate: "0000-01-01 00:00" },
 
+        search: { /*搜尋參數*/
+            all:false, eve_id:"", apartmentid:"", user_id:"", search:"",
+        },
+
         /*api需提供以下資料*/
-        calendar: { sdate: "2021-06-01 00:00", edate: "2021-06-30 00:00" } /*所有工作最早開始&最晚結束日期*/,
+        calendar: { sdate: "9999-01-01 00:00", edate: "0000-01-01 00:00" } /*所有工作最早開始&最晚結束日期*/,
         works: [
-            /*各個工作的資料*/ { eve_id: "1", step_order: "1", step_id: "1", name: "甲甲公司-AAA事件：工作1-1XXXXX", u_name:"員工壹", sdate: "2021-06-06 09:00", edate: "2021-06-06 12:00", state: "" },
-            { eve_id: "1", step_order: "2", step_id: "2", name: "甲甲公司-AAA事件：工作1-2XXXXX", u_name:"員工貳", sdate: "2021-06-07 09:30", edate: "2021-06-07 18:30", state: "hurry" },
-            { eve_id: "1", step_order: "3", step_id: "3", name: "甲甲公司-AAA事件：工作1-3XXXXX", u_name:"員工壹", sdate: "2021-06-06 00:00", edate: "2021-06-07 00:00", state: "" },
-            { eve_id: "2", step_order: "1", step_id: "4", name: "乙乙公司-BBB事件：工作1-1XXXXX", u_name:"員工叁", sdate: "2021-06-06 00:00", edate: "2021-06-08 00:00", state: "" },
-            { eve_id: "3", step_order: "1", step_id: "5", name: "丙丙公司-CCC事件：工作1-1XXXXX", u_name:"員工叁", sdate: "2021-06-28 00:00", edate: "2021-06-28 00:00", state: "" },
+            /*各個工作的資料*/ 
+            { eve_id: "1", step_order: "1", step_id: "3", name: "甲公司-AAA事件：工作1-1XXXXX", u_name:"員工壹", sdate: "2022-06-06 09:00", edate: "2022-06-06 12:00", state: "" },
+            { eve_id: "1", step_order: "2", step_id: "3", name: "甲公司-AAA事件：工作1-2XXXXX", u_name:"員工貳", sdate: "2022-06-07 09:30", edate: "2022-06-07 18:30", state: "hurry" },
+            { eve_id: "1", step_order: "3", step_id: "3", name: "甲公司-AAA事件：工作1-3XXXXX", u_name:"員工壹", sdate: "2022-06-10 09:00", edate: "2022-06-10 18:00", state: "hurry" },
+            { eve_id: "2", step_order: "1", step_id: "3", name: "乙公司-BBB事件：工作2-1XXXXX", u_name:"員工叁", sdate: "2022-06-06 09:00", edate: "2022-06-08 00:00", state: "" },
+            { eve_id: "3", step_order: "1", step_id: "3", name: "丙公司-CCC事件：工作3-1XXXXX", u_name:"員工壹", sdate: "2022-07-01 09:00", edate: "2022-07-05 00:00", state: "" },
+            { eve_id: "4", step_order: "2", step_id: "3", name: "丙公司-DDD事件：工作4-1XXXXX", u_name:"員工壹", sdate: "2022-07-06 09:00", edate: "2022-07-06 12:00", state: "" },
+            { eve_id: "4", step_order: "3", step_id: "3", name: "丙公司-DDD事件：工作4-2XXXXX", u_name:"員工肆", sdate: "2022-07-15 09:00", edate: "2022-07-18 18:00", state: "" },
+            { eve_id: "5", step_order: "1", step_id: "3", name: "甲公司-EEE事件：工作5-1XXXXX", u_name:"員工叁", sdate: "2022-08-01 09:00", edate: "2022-08-07 18:00", state: "" },
+            { eve_id: "5", step_order: "2", step_id: "3", name: "甲公司-EEE事件：工作5-2XXXXX", u_name:"員工貳", sdate: "2022-08-10 12:00", edate: "2022-08-11 18:00", state: "" },
+            { eve_id: "6", step_order: "1", step_id: "3", name: "戊公司-FFF事件：工作6-1XXXXX", u_name:"員工貳", sdate: "2022-09-10 09:00", edate: "2022-09-12 12:00", state: "" },
+            { eve_id: "7", step_order: "1", step_id: "3", name: "己公司-GGG事件：工作7-1XXXXX", u_name:"員工叁", sdate: "2022-09-12 13:30", edate: "2022-09-14 18:00", state: "" },
+            { eve_id: "7", step_order: "2", step_id: "3", name: "己公司-GGG事件：工作7-2XXXXX", u_name:"員工叁", sdate: "2022-08-01 09:00", edate: "2022-08-05 18:00", state: "" },
+            { eve_id: "7", step_order: "3", step_id: "3", name: "己公司-GGG事件：工作7-3XXXXX", u_name:"員工叁", sdate: "2022-08-11 09:00", edate: "2022-08-12 18:00", state: "" },
+            { eve_id: "8", step_order: "1", step_id: "3", name: "甲公司-HHH事件：工作8-1XXXXX", u_name:"員工叁", sdate: "2022-09-01 09:00", edate: "2022-09-03 12:00", state: "" },
+            { eve_id: "8", step_order: "2", step_id: "3", name: "甲公司-HHH事件：工作8-2XXXXX", u_name:"員工肆", sdate: "2022-10-08 09:00", edate: "2022-10-20 18:00", state: "" },
+            { eve_id: "9", step_order: "1", step_id: "3", name: "丙公司-III事件：工作9-1XXXXX", u_name:"員工叁", sdate: "2022-06-08 09:00", edate: "2022-06-15 18:00", state: "hurry" },
+            { eve_id: "9", step_order: "2", step_id: "3", name: "丙公司-III事件：工作9-2XXXXX", u_name:"員工貳", sdate: "2022-06-20 09:00", edate: "2022-06-21 12:00", state: "" },
+            { eve_id: "9", step_order: "3", step_id: "3", name: "丙公司-III事件：工作9-3XXXXX", u_name:"員工叁", sdate: "2022-07-06 12:00", edate: "2022-07-09 18:00", state: "" },
+            { eve_id: "9", step_order: "4", step_id: "3", name: "丙公司-III事件：工作9-4XXXXX", u_name:"員工壹", sdate: "2022-07-08 09:00", edate: "2022-07-10 18:30", state: "" },
         ],
+
+        /*EIP額外功能*/
+        events: [], /*事件搜尋下拉選*/
     };
     /*初始化今日時間區間*/
     {
         var dateObj = new Date();
-        current_s = dateObj.getFullYear() + "-" + (dateObj.getMonth() + 1) + "-" + dateObj.getDate();
+        current_s = dateObj.getFullYear() + "-" + (dateObj.getMonth() + 1) + "-" + dateObj.getDate() + " 00:00";
         var current_obj = new Date(current_s);
         workFlowData.current_day.sdate = date_to_format_time(current_obj);
         current_obj.setDate(current_obj.getDate() + 1); /*再加1天作為結束時間*/
         workFlowData.current_day.edate = date_to_format_time(current_obj);
+
+        /*假資料*/
+        workFlowData.current_day.sdate = '2022-10-18 00:00';
+        workFlowData.current_day.edate = '2022-10-19 00:00';
+        workFlowData.works.push({
+            eve_id: "10", step_order: "1", step_id: "3", name: "丙公司-無時間事件：工作10-1XXXXX", u_name:"員工壹", sdate: workFlowData.current_day.sdate, edate: workFlowData.current_day.sdate, state: "" 
+        });
     }
+    let slider2 = null;
     function init_vue() {
         var workFlowVM = new Vue({
             el: "#workFlow",
@@ -79,22 +146,37 @@
             computed: {},
             created: function () {
                 this.$nextTick(function () {
-                    $("#slider").slider({
-                        /*初始化滑桿*/ value: 200,
+                    /*初始化滑桿*/ 
+                    $(".slider").slider({
+                        value: 50,
                         min: 50,
                         max: 400,
                         slide: function (event, ui) {
-                            this.unit_width = ui.value;
+                            workFlowVM.unit_width = ui.value;
+                        },
+                    });
+                    slider2 = $(".slider2").slider({
+                        value: 300,
+                        min: 100,
+                        max: 300,
+                        slide: function (event, ui) {
+                            workFlowVM.unit2_width = ui.value;
                         },
                     });
                 });
             },
             updated: function () {
                 this.$nextTick(function () {
-                    // Code that will run only after the entire view has been re-rendered
                     $(".week_day, .eve_title, .work_time").tooltip(); /*初始化tooltip*/
+                    // Code that will run only after the entire view has been re-rendered
                     $(".thead").css("height", $(".week_day").height() + "px"); /*設定左右兩區塊表頭同高*/
+                
                 });
+
+                $('#time_bar_area .current_day_mark').height($('#all_time_bar').height());
+
+                /*更新滑桿最大值*/ 
+                slider2.slider("option", "max", $('.input_area').width()*2);
             },
             methods: {
                 to_time_stamp: function (format_date) {
@@ -123,30 +205,50 @@
                     // console.log(newdate);
                     /*檢查與更新某工作開/始結束時間*/
 
-                    result = this.check_and_update_work_time(newdate, index, time_type, work);
+                    result = workFlowVM.check_and_update_work_time(newdate, index, time_type, work);
                     if (result) {
                         Vue.toasted.show("修改時間成功", { duration: 1500, className: ["toasted-primary", "bg-success"] });
                     }
                 },
                 get_work_width: function (work) {
-                    return ((this.to_time_stamp(work.edate) - this.to_time_stamp(work.sdate)) / this.unit_time) * this.unit_width;
+                    if(work.edate && work.sdate){
+                        if(work.edate>=work.sdate){
+                            return ((this.to_time_stamp(work.edate) - this.to_time_stamp(work.sdate)) / this.unit_time) * this.unit_width;
+                        }
+                    }
+                    return 0;
                 },
                 get_work_position: function (work) {
                     return ((this.to_time_stamp(work.sdate) - this.to_time_stamp(this.calendar.sdate)) / this.unit_time) * this.unit_width;
                 },
-                get_calendar: function (scroll_to_end = false, to_current_day=false) {
-                    if (this.current_day.sdate > this.calendar.edate) this.calendar.edate = this.current_day.edate;
-                    if (this.current_day.edate < this.calendar.sdate) this.calendar.sdate = this.current_day.sdate;
+                init_calendar:function (){ /*初始化calendar，依工作起始日設定日立最初、最終日*/
+                    self = this;
+                    for (var i = 0; i < self.works.length; i++) {
+                        if(self.works[i].edate > self.calendar.edate && self.works[i].edate){ self.calendar.edate = self.works[i].edate; }
+                        if(self.works[i].sdate < self.calendar.sdate && self.works[i].sdate){ self.calendar.sdate = self.works[i].sdate; }
+                    }
+                    let dateObj = new Date(workFlowData.calendar.sdate);
+                    adj_sdate = dateObj.getFullYear() + "-" + (dateObj.getMonth() + 1).toString().padStart(2, "0") + "-" + dateObj.getDate().toString().padStart(2, "0") + " 00:00";
+                    workFlowData.calendar.sdate = adj_sdate;
+                },
+                get_calendar: function (scroll_to_end=false, scroll_current_day=false) {
+                    self = this;
+                    self.init_calendar();
+                    // console.log(self.calendar);
+                    if(self.to_current_day){ /*需配合當前日期來顯示*/
+                        if (self.current_day.sdate > self.calendar.edate) self.calendar.edate = self.current_day.edate;
+                        if (self.current_day.edate < self.calendar.sdate) self.calendar.sdate = self.current_day.sdate;
+                    }
 
-                    cols = (this.to_time_stamp(this.calendar.edate) - this.to_time_stamp(this.calendar.sdate)) / this.unit_time;
+                    cols = Math.ceil((self.to_time_stamp(self.calendar.edate) - self.to_time_stamp(self.calendar.sdate)) / self.unit_time);
                     cObj = [];
                     for (var i = 0; i < Array(cols).length; i++) {
                         /*製作日曆單日資料*/
-                        d = new Date(this.calendar.sdate);
-                        d.setSeconds(d.getSeconds() + i * this.unit_time);
+                        d = new Date(self.calendar.sdate);
+                        d.setSeconds(d.getSeconds() + i * self.unit_time);
                         day = {
                             name: d.getMonth() + 1 + "/" + d.getDate(),
-                            weekday: this.week_day_list[d.getDay()],
+                            weekday: self.week_day_list[d.getDay()],
                             holiday: false,
                             holiday_name: "",
                             holiday_category: "",
@@ -154,7 +256,7 @@
                         };
 
                         /*比對假日*/
-                        format_date = this.date_obj_to_format_time(d).slice(0, 10);
+                        format_date = self.date_obj_to_format_time(d).slice(0, 10);
                         sindex = holiday_data.indexOf(format_date);
                         if (sindex != -1) {
                             day["holiday"] = true;
@@ -168,8 +270,8 @@
                         cObj.push(day);
                         delete d;
                     }
-                    this.calendar_days = cObj;
-                    // console.log(this.calendar_days)
+                    self.calendar_days = cObj;
+                    // console.log(self.calendar_days)
 
                     if (scroll_to_end) {
                         /*是否需要移動轉軸至末端*/
@@ -178,11 +280,22 @@
                         }, 100);
                     }
 
-                    if(to_current_day){
-                        /*轉移轉軸至今日*/;
+                    // console.log(self.to_current_day);
+                    // console.log($('.current_day_mark').css('left'));
+                    if(scroll_current_day){
                         setTimeout(function () {
-                            move_time_bar_area_scroll($('.current_day_mark').css('left').slice(0,-2), absolute=true) 
+                            /*轉移轉軸至今日*/;
+                            self.move_to_current_date();
                         }, 100);
+                    }
+
+                },
+                move_to_current_date: function(){
+                    const current_day_mark = $('.current_day_mark');
+                    if(current_day_mark.length>0){
+                        move_time_bar_area_scroll(current_day_mark.css('left').slice(0,-2), absolute=true);
+                    }else{
+                        Vue.toasted.show("工作排程中並未顯示今日日期", { duration: 1500 });
                     }
                 },
                 get_diff_minutes_by_move: function (new_x) {
@@ -299,9 +412,9 @@
                             result = false;
                         }
                     }
-                    this.works[index][time_type] = new_format_time; /*更改此工作的時間*/
+                    workFlowVM.works[index][time_type] = new_format_time; /*更改此工作的時間*/
 
-                    this.get_area_s_e_date(); /*更新日期區的開始結束時間*/
+                    workFlowVM.get_area_s_e_date(); /*更新日期區的開始結束時間*/
                     return result;
                 },
                 click_one_time: function (index, work) {
@@ -312,7 +425,7 @@
                         timeOut = setTimeout(() => {
                             /*延後執行，以便確認是單擊還是雙擊*/
                             // this.chage_work_state(index, work); /*更新事件狀態*/
-                            this.open_change_panel(index, work);/*開啟控制編輯面板*/
+                            this.open_change_panel(index, work); /*開啟編輯面板*/
                         }, 300); // 大概時間300ms
                     } else {
                         hasMove = false; /*設定為位移動*/
@@ -329,15 +442,11 @@
                     this.works[index]["state"] = new_state;
                 },
                 open_change_panel: function(index, work){ 
-                    if(!this.editable){ return; }
-
                     $('#edit_panel_btn').click();
                     this.edit_panel_index = index;
                     this.edit_panel = Object.assign({}, work);
                 },
                 do_edit_panel: function(){
-                    if(!this.editable){ return; }
-
                     if(this.edit_panel_index !== ""){
                         edit_panel = $('#edit_panel');
                         s_panel = edit_panel.find('.start_time');
@@ -358,24 +467,33 @@
                         }else{
                             this.works[this.edit_panel_index].sdate = new_sdate;
                             this.works[this.edit_panel_index].edate = new_edate;
+                            this.works[this.edit_panel_index].estimated_time = edit_panel.find("input[name='estimated_time']").val();
+                            this.works[this.edit_panel_index].exact_time = edit_panel.find("input[name='exact_time']").val();
                             this.edit_panel_index = "";
                             // this.save_date();
                         }
                     }else{
                         Vue.toasted.show("未選擇編輯對象", { duration: 1500, className: ["toasted-primary", "bg-success"] });
                     }
-                    this.get_area_s_e_date(); /*更新日期區的開始結束時間*/
+                    workFlowVM.get_area_s_e_date(); /*更新日期區的開始結束時間*/
                     $('#edit_panel').modal('hide');
                 },
                 set_work_notime: function (index) {
                     if(!this.editable){ return; }
 
                     clearTimeout(timeOut); /*清除計時器，停止單擊的執行*/
-                    if (confirm("確定取消排程？")) {
-                        this.works[index]["sdate"] = "";
-                        this.works[index]["edate"] = "";
-                        Vue.toasted.show("取消排程成功", { duration: 1500, className: ["toasted-primary", "bg-success"] });
-                    }
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '確定取消排程？',
+                        showDenyButton: true,
+                        confirmButtonText: '確定',
+                        denyButtonText: '取消',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                           this.works[index]["edate"] = this.works[index]["sdate"];
+                            Vue.toasted.show("取消排程成功", { duration: 1500, className: ["toasted-primary", "bg-success"] });
+                        }
+                    });
                 },
                 get_area_s_e_date: function () {
                     temp_s = "9999/12/31 23:59";
@@ -406,7 +524,8 @@
                         edateObj.setMinutes(0);
                         this.calendar.edate = this.date_obj_to_format_time(edateObj); /*更新日歷結束日*/
 
-                        this.get_calendar((scroll_to_end = ori_edate < temp_e)); /*更新日歷*/
+                        let scroll_to_end = ori_edate < temp_e;
+                        this.get_calendar(scroll_to_end, false); /*更新日歷*/
                     }
                 },
                 renew_work_sort: function () {
@@ -535,38 +654,51 @@
                     this.works = new_works;
                 },
                 save_date: function () {
-                    $.ajax({
-                        url: "/index.php/Fig/update_working_steps",
-                        type: "POST",
-                        datatype: "json",
-                        data: { steps: workFlowVM.works },
-                        success: function (response) {
-                            bg_class = response.status == 1 ? "bg-success" : "bg-danger";
-                            Vue.toasted.show(response.info, { duration: 1500, className: ["toasted-primary", bg_class] });
-                        },
-                    });
+                    // TODO 儲存資料
+                    // $.ajax({
+                    //     url: "/index.php/Fig/update_working_steps",
+                    //     type: "POST",
+                    //     datatype: "json",
+                    //     data: { steps: workFlowVM.works },
+                    //     success: function (response) {
+                    //         bg_class = response.status == 1 ? "bg-success" : "bg-danger";
+                    //         Vue.toasted.show(response.info, { duration: 1500, className: ["toasted-primary", bg_class] });
+                    //     },
+                    // });
                 },
-                get_work_data: function(to_current_day=false){
-                    $.ajax({
-                        url: "/index.php/Fig/aj_get_working_steps",
-                        type: "GET",
-                        datatype: "json",
-                        data: this.search,
-                        success: function (res) {
-                            console.log(res);
-                            workFlowVM.calendar.sdate = res.sdate;
-                            workFlowVM.calendar.edate = res.edate;
-                            workFlowVM.works = res.steps_data;
+                get_work_data: function(){
+                    self = this;
+                    self.search.fig_time_s = $('[name="fig_time_s"]').val();
+                    self.search.fig_time_e = $('[name="fig_time_e"]').val();
 
-                            workFlowVM.get_calendar(scroll_to_end=false, to_current_day);
-                        },
-                    });
-                }
+                    if(self.search.fig_time_s || self.search.fig_time_e){
+                        self.to_current_day = false;
+                        self.search.all = true;
+                    }else{
+                        self.search.all = false;
+                    }
+
+                    // TODO 載入工作
+                    // $.ajax({
+                    //     url: "/index.php/Fig/aj_get_working_steps",
+                    //     type: "GET",
+                    //     datatype: "json",
+                    //     data: self.search,
+                    //     success: function (res) {
+                    //         // console.log(res);
+                    //         workFlowVM.calendar.sdate = res.sdate;
+                    //         workFlowVM.calendar.edate = res.edate;
+                    //         workFlowVM.works = res.steps_data;
+                    //         workFlowVM.events = res.events;
+
+                    //         workFlowVM.get_calendar(scroll_to_end=false, self.to_current_day);
+                    //         Vue.toasted.show("搜尋完畢", { duration: 1500, className: ["toasted-primary", "bg-success"] });
+                    //     },
+                    // });
+                    workFlowVM.get_calendar(scroll_to_end=false, self.to_current_day);
+                },
             },
         });
-        // workFlowVM.get_work_data(to_current_day=true); /*取得工作排程*/
-        workFlowVM.get_calendar(scroll_to_end=false, to_current_day=true); /*初始化日歷*/
-
         return workFlowVM;
     }
 }
