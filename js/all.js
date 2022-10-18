@@ -674,8 +674,9 @@
                     if(self.search.fig_time_s || self.search.fig_time_e){
                         self.to_current_day = false;
                         self.search.all = true;
-                    }else{
+                    }else if(self.search.fig_time_s=='' && self.search.fig_time_e==''){
                         self.search.all = false;
+                        // self.to_current_day = true;
                     }
 
                     // TODO 載入工作
